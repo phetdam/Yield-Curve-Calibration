@@ -1,0 +1,4 @@
+# use LF by default
+* text=auto
+# batch files need CRLF
+*.bat text eol=crlf
