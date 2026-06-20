@@ -20,6 +20,8 @@ def calcDisRate(name: str):
   print(f"months: {monthlyTimePeriods}\nyears: {annualTimePeriods}")
   disFactDF = pd.DataFrame(index=df.index, columns=df.columns, dtype=float)
 
+  # find the index of the 6 month (we need this later)
+  i6m = df.columns.get_loc("6 Mo")
   # iterate for each date and each column (maturity)
   for d, date in enumerate(df.index):
     for i, period in enumerate(periods):
@@ -31,10 +33,10 @@ def calcDisRate(name: str):
       elif "Yr" in period:
         # rate for this period
         r = df.loc[date, period] / 100
-        # previous maturities' rates (need to divide by half for compounding)
-        prev_rates = 0.01 * 0.5 * df.iloc[d, 0:i].values
-        # sum of discounted previous maturities' rates
-        rsum = (prev_rates * disFactDF.iloc[d, 0:i].values).sum()
+        # previous maturities' rates
+        prev_rates = df.iloc[d, i6m:i].values / 100
+        # sum of discounted previous maturities' rates w/ compounding factor
+        rsum = (0.5 * prev_rates * disFactDF.iloc[d, i6m:i].values).sum()
         # compute discount factor by subtracting the previous discounted rates
         disFactDF.loc[date, period] = (1 - rsum) / (1 + 0.5 * r)
   #print(disFactDF)
