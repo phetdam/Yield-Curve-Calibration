@@ -27,25 +27,10 @@ def calcDisRate(name: str):
     date = df.loc[row, 'Date']
     for i, period in enumerate(periods):
       if "Mo" in period:
-        #str = period.split()
-        #time = float(str[0]) * 30.42
         rate = df.loc[row, period] / 100.0
-        #disFactDF.loc[df.loc[row, 'Date'], period] = 1 * ((rate * time) / 365)
         disFactDF.loc[df.loc[row, 'Date'], period] = 1 / (1 + 0.5 * rate)
       elif "Yr" in period:
-        #str = period.split()
-        #time = float(str[0]) * 30.42
         rate = df.loc[row, period] / 100.0
-        #sixMonthPeriod = periods[np.where(periods == "6 Mo")][0]
-        #print(sixMonthPeriod)
-        '''splitStr = sixMonthPeriod.split()
-        sixMonthTime = float(splitStr[0]) * 30.42
-        if str[0].__eq__("1"):
-          disFactDF.loc[df.loc[row, 'Date'], period] = 1 * ((rate * time) / 365) + (1 * ((rate * sixMonthTime) / 365))
-        else:
-          previousSum = disFactDF.loc[date, periods[:i]].sum()
-          disFactDF.loc[df.loc[row, 'Date'], period] = 1 * ((rate * time) / 365) + previousSum + (1 * ((rate * sixMonthTime) / 365))
-        '''
         prevRates = 0.01 * 0.5 * df.iloc[row, 1:(i + 1)].values
         rsum = (prevRates * disFactDF.iloc[row, 0:i].values).sum()
         disFactDF.loc[df.loc[row, 'Date'], period] = (1 - rsum) / (1 + 0.5 * rate)
@@ -73,7 +58,7 @@ def graph(pd):
     plt.plot(weeksNumeric, pd.loc[date], marker = 'o', label = date)
 
   #plt.xlabel('Maturity (Weeks and Years)')
-    plt.xlabel('Maturity (Converted to Years for Uniformity)')
+  plt.xlabel('Maturity (Converted to Years for Uniformity)')
   plt.ylabel('Discount Factor')
   plt.title('Treasury Par Yield Curve Discount Factors')
   plt.legend()
