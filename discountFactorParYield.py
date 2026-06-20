@@ -23,6 +23,8 @@ def calcDisRate(name: str):
   disFactDF = pd.DataFrame(index = df['Date'],  columns = df.columns[1:], dtype = float)
   #print(disFactDF)
 
+  i6m = df.columns.get_loc("6 Mo")
+
   for row in range(len(df)):
     date = df.loc[row, 'Date']
     for i, period in enumerate(periods):
@@ -31,8 +33,8 @@ def calcDisRate(name: str):
         disFactDF.loc[df.loc[row, 'Date'], period] = 1 / (1 + 0.5 * rate)
       elif "Yr" in period:
         rate = df.loc[row, period] / 100.0
-        prevRates = 0.01 * 0.5 * df.iloc[row, 1:(i + 1)].values
-        rsum = (prevRates * disFactDF.iloc[row, 0:i].values).sum()
+        prevRates = df.iloc[row, i6m:i].values / 100
+        rsum = (0.5 * prevRates * disFactDF.iloc[row, i6m:i].values).sum()
         disFactDF.loc[df.loc[row, 'Date'], period] = (1 - rsum) / (1 + 0.5 * rate)
 
   #print(disFactDF)
@@ -52,7 +54,7 @@ def graph(pd):
       weeksNumeric.append(week)
   #print(weeks)
   #print(weeksNumeric)
-  
+
   for date in pd.index:
     #plt.plot(weeks, pd.loc[date], marker = 'o', label = date)
     plt.plot(weeksNumeric, pd.loc[date], marker = 'o', label = date)
