@@ -4,56 +4,57 @@ import re
 import numpy as np
 
 def calcDisRate(name: str):
-  df = pd.read_csv(name)
-  #print(df)
+  # use "Date" column as index
+  df = pd.read_csv(name, index_col="Date")
+  print(f"par rates:\n{df}")
   periods = df.columns.to_numpy()
-  periods = periods[1:]
-  print(periods)
+  # for info: print monthly and annual periods
   monthlyTimePeriods = []
   annualTimePeriods = []
   for period in periods:
     if "Mo" in period:
-      str = period.split()
-      monthlyTimePeriods.append(float(str[0]))
+      monthlyTimePeriods.append(float(period.split()[0]))
     elif "Yr" in period:
-      str = period.split()
-      annualTimePeriods.append(int(str[0]))
+      annualTimePeriods.append(float(period.split()[0]))
   
-  print(monthlyTimePeriods, "\n", annualTimePeriods)
-  disFactDF = pd.DataFrame(index = df['Date'],  columns = df.columns[1:], dtype = float)
-  #print(disFactDF)
+  print(f"months: {monthlyTimePeriods}\nyears: {annualTimePeriods}")
+  disFactDF = pd.DataFrame(index=df.index, columns=df.columns, dtype=float)
 
-  for row in range(len(df)):
-    date = df.loc[row, 'Date']
+  # iterate for each date and each column (maturity)
+  for d, date in enumerate(df.index):
     for i, period in enumerate(periods):
+      # short end construction
       if "Mo" in period:
-        str = period.split()
-        time = float(str[0]) * 30.42
-        rate = df.loc[row, period] / 100.0
-        disFactDF.loc[df.loc[row, 'Date'], period] = 1 * ((rate * time) / 365)
+        r = df.loc[date, period] / 100
+        disFactDF.loc[date, period] = 1 / (1 + 0.5 * r)
+      # long end construction
       elif "Yr" in period:
-        str = period.split()
-        time = float(str[0]) * 30.42
-        rate = df.loc[row, period] / 100.0
-        sixMonthPeriod = periods[np.where(periods == "6 Mo")][0]
-        #print(sixMonthPeriod)
-        splitStr = sixMonthPeriod.split()
-        sixMonthTime = float(splitStr[0]) * 30.42
-        if str[0].__eq__("1"):
-          disFactDF.loc[df.loc[row, 'Date'], period] = 1 * ((rate * time) / 365) + (1 * ((rate * sixMonthTime) / 365))
-        else:
-          previousSum = disFactDF.loc[date, periods[:i]].sum()
-          disFactDF.loc[df.loc[row, 'Date'], period] = 1 * ((rate * time) / 365) + previousSum + (1 * ((rate * sixMonthTime) / 365)) 
-  
+        # rate for this period
+        r = df.loc[date, period] / 100
+        # previous maturities' rates (need to divide by half for compounding)
+        prev_rates = 0.01 * 0.5 * df.iloc[d, 0:i].values
+        # sum of discounted previous maturities' rates
+        rsum = (prev_rates * disFactDF.iloc[d, 0:i].values).sum()
+        # compute discount factor by subtracting the previous discounted rates
+        disFactDF.loc[date, period] = (1 - rsum) / (1 + 0.5 * r)
   #print(disFactDF)
-  return disFactDF 
+  return disFactDF
+
+
+def to_yf(s: str) -> float:
+  """Converts "x Mo" and "y Yr" strings to year fractions."""
+  # months/years + "Mo" or "Yr"
+  time, period = s.split()
+  return float(time) / 12 if period == "Mo" else float(time)
+
  
 def graph(pd):
-  weeks = pd.columns
+  # convert weeks/months columns to year fractions
+  times = [to_yf(s) for s in pd.columns]
   for date in pd.index:
-    plt.plot(weeks, pd.loc[date], marker = 'o', label = date)
+    plt.plot(times, pd.loc[date], marker='o', label=date)
 
-  plt.xlabel('Maturity (Weeks and Years)')
+  plt.xlabel('Maturity (Years)')
   plt.ylabel('Discount Factor')
   plt.title('Treasury Par Yield Curve Discount Factors')
   plt.legend()
