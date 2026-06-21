@@ -82,8 +82,10 @@ def to_yf(s: str) -> float:
 def graph(pd):
   # convert weeks/months columns to year fractions
   times = [to_yf(s) for s in pd.columns]
+  # note: can use -np.log(pd.loc[date]) / times instead for continuously
+  # compounded yields to verify the discount factors are proportional
   for date in pd.index:
-    plt.plot(times, -np.log(pd.loc[date]) / times, marker='o', label=date)
+    plt.plot(times, pd.loc[date], marker='o', label=date)
 
   plt.xlabel('Maturity (Years)')
   plt.ylabel('Discount Factor')
