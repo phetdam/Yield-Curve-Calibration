@@ -78,7 +78,7 @@ def to_yf(s: str) -> float:
   time, period = s.split()
   return float(time) / 12 if period == "Mo" else float(time)
 
- 
+
 def graph(pd):
   # convert weeks/months columns to year fractions
   times = [to_yf(s) for s in pd.columns]
