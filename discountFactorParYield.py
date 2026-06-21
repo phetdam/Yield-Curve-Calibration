@@ -18,7 +18,7 @@ def par_rates_to_dfs(name: str):
       months.append(float(period.split()[0]))
     elif "Yr" in period:
       years.append(float(period.split()[0]))
-  
+
   # find longest year
   last_mat = int(df.columns[-1].split()[0])
   # for bootstrapping, we need a discount factor every half year, as the par
