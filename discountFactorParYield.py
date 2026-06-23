@@ -4,10 +4,11 @@ import re
 import numpy as np
 
 def calcDisRate(name: str):
-  df = pd.read_csv(name)
+  #df = pd.read_csv(name)
   #print(df)
+  df = pd.read_csv(name, index_col = "Date")
   periods = df.columns.to_numpy()
-  periods = periods[1:]
+  #periods = periods[1:]
   print(periods)
   monthlyTimePeriods = []
   annualTimePeriods = []
@@ -17,28 +18,44 @@ def calcDisRate(name: str):
       monthlyTimePeriods.append(float(str[0]))
     elif "Yr" in period:
       str = period.split()
-      annualTimePeriods.append(int(str[0]))
+      annualTimePeriods.append(float(str[0]))
 
   print(monthlyTimePeriods, "\n", annualTimePeriods)
-  disFactDF = pd.DataFrame(index = df['Date'],  columns = df.columns[1:], dtype = float)
+  #disFactDF = pd.DataFrame(index = df['Date'],  columns = df.columns[1:], dtype = float)
   #print(disFactDF)
+
+  lastMat = int(df.columns[-1].split()[0])
+  
+  biannualDisFacts = pd.DataFrame(index = df.index, columns = [f"{0.5 * (i + 1)}y" for i in range(2 * lastMat)], dtype = float)
+  
+  biannualBills = pd.DataFrame(index = df.index, columns = [f"{float(m)}m" for m in monthlyTimePeriods], dtype = float)
+
+  for date in df.index:
+    for i, m in enumerate(monthlyTimePeriods):
+      rate = df.loc[date, df.columns[i]] / 100
+      biannualBills.loc[date, f"{float(m)}m"] = 1 / (1 + float(m) * rate / 12)
+      
+  biannualDisFacts["0.5y"] = biannualBills["6.0m"]
 
   i6m = df.columns.get_loc("6 Mo")
 
-  for row in range(len(df)):
-    date = df.loc[row, 'Date']
-    for i, period in enumerate(periods):
-      if "Mo" in period:
-        rate = df.loc[row, period] / 100.0
-        disFactDF.loc[df.loc[row, 'Date'], period] = 1 / (1 + 0.5 * rate)
-      elif "Yr" in period:
-        rate = df.loc[row, period] / 100.0
-        prevRates = df.iloc[row, i6m:i].values / 100
-        rsum = (0.5 * prevRates * disFactDF.iloc[row, i6m:i].values).sum()
-        disFactDF.loc[df.loc[row, 'Date'], period] = (1 - rsum) / (1 + 0.5 * rate)
+  interpolationDF = pd.DataFrame(index = biannualDisFacts.index, columns = biannualDisFacts.columns, dtype = float)
+  for d, date in enumerate(interpolationDF.index):
+    interpolationDF.loc[date, :] = np.interp([0.5 * (i + 1) for i in range(len(biannualDisFacts.columns))], 
+      [0.5] + annualTimePeriods, df.iloc[d, i6m:])
 
-  #print(disFactDF)
-  return disFactDF
+  for d, date in enumerate(biannualDisFacts.index):
+    for i, col in enumerate(biannualDisFacts.columns):
+      rate = interpolationDF.loc[date, col] / 100
+      rsum = (0.5 * rate * biannualDisFacts.iloc[d, 0:i].values).sum()
+      biannualDisFacts.loc[date, col] = (1 - rsum) / (1 + 0.5 * rate)
+
+  finalDisFacts = pd.DataFrame(index = df.index, columns = df.columns, dtype = float)
+  finalDisFacts.iloc[:, 0:(i6m + 1)] = biannualBills.values
+
+  for d, date in enumerate(finalDisFacts.index):
+    finalDisFacts.iloc[d, i6m + 1:] = [biannualDisFacts.loc[date, f"{a}y"] for a in annualTimePeriods]
+  return finalDisFacts
 
 def graph(pd):
   weeks = pd.columns
