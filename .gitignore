@@ -1,0 +1,4 @@
+# ignore Vim swap files
+*.swap
+# ignore __pycache__
+**/__pycache__
