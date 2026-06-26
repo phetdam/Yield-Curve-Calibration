@@ -2,8 +2,9 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import re
 import numpy as np
+import math
 
-def calcDisRate(name: str):
+def processDF(name: str):
   #df = pd.read_csv(name)
   #print(df)
   df = pd.read_csv(name, index_col = "Date")
@@ -23,7 +24,10 @@ def calcDisRate(name: str):
   print(monthlyTimePeriods, "\n", annualTimePeriods)
   #disFactDF = pd.DataFrame(index = df['Date'],  columns = df.columns[1:], dtype = float)
   #print(disFactDF)
+  return df, monthlyTimePeriods, annualTimePeriods
 
+def calcDisFact(name: str):
+  df, monthlyTimePeriods, annualTimePeriods = processDF(name)
   lastMat = int(df.columns[-1].split()[0])
   
   biannualDisFacts = pd.DataFrame(index = df.index, columns = [f"{0.5 * (i + 1)}y" for i in range(2 * lastMat)], dtype = float)
@@ -55,7 +59,28 @@ def calcDisRate(name: str):
 
   for d, date in enumerate(finalDisFacts.index):
     finalDisFacts.iloc[d, i6m + 1:] = [biannualDisFacts.loc[date, f"{a}y"] for a in annualTimePeriods]
-  return finalDisFacts
+  
+  contCompYields = pd.DataFrame(index = df.index, columns = df.columns, dtype = float)
+
+  #print(contCompYields)
+
+  for d, date in enumerate(contCompYields.index):
+    #print(d, date)
+    for i, col in enumerate(contCompYields.columns):
+      #print(i, col)
+      if "Mo" in col:
+        str = col.split()
+        year = float(str[0]) / 12
+      elif "Yr" in col:
+        str = col.split()
+        year = float(str[0])
+      #print(finalDisFacts.loc[date, col])
+      contCompYields.loc[date, col] = -(1 / year) * math.log(finalDisFacts.loc[date, col])
+              
+  #print(contCompYields)
+  
+  #return finalDisFacts
+  return contCompYields
 
 def graph(pd):
   weeks = pd.columns
@@ -85,7 +110,8 @@ def graph(pd):
   plt.show()
 
 def main():
-  periodDF = calcDisRate('daily-treasury-par-yield-curve-rates.csv')
+  #periodDF = calcDisRate('daily-treasury-par-yield-curve-rates.csv')
+  periodDF = calcDisFact('daily-treasury-par-yield-curve-rates.csv')
   print(periodDF)
   graph(periodDF)
   pass
