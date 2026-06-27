@@ -6,8 +6,7 @@ def main():
   periodDF = calcDisFact('../daily-treasury-par-yield-curve-rates.csv')
   print(periodDF)
   graph(periodDF)
-  pass
-  
+  pass  
 
 if __name__ == "__main__":
   main()
