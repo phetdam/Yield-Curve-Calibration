@@ -60,7 +60,11 @@ def calcDisFact(name: str):
   for d, date in enumerate(finalDisFacts.index):
     finalDisFacts.iloc[d, i6m + 1:] = [biannualDisFacts.loc[date, f"{a}y"] for a in annualTimePeriods]
 
-  contCompYields = pd.DataFrame(index = df.index, columns = df.columns, dtype = float)
+  return finalDisFacts
+
+def calcYields(name: str):
+  finalDisFacts = calcDisFact(name)
+  contCompYields = pd.DataFrame(index = finalDisFacts.index, columns = finalDisFacts.columns, dtype = float)
 
   #print(contCompYields)
 
@@ -112,8 +116,11 @@ def graph(pd):
 def main():
   #periodDF = calcDisRate('daily-treasury-par-yield-curve-rates.csv')
   periodDF = calcDisFact('daily-treasury-par-yield-curve-rates.csv')
-  print(periodDF)
-  graph(periodDF)
+  yieldsDF = calcYields('daily-treasury-par-yield-curve-rates.csv')
+  #print(periodDF)
+  #graph(periodDF)
+  print(yieldsDF)
+  graph(yieldsDF)
   pass
 
 if __name__ == "__main__":
