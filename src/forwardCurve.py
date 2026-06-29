@@ -57,7 +57,7 @@ def graph(pd):
 
 def main():
   #yieldsDF = calcYields('daily-treasury-par-yield-curve-rates.csv')
-  forwardCurves = forwardCurve('daily-treasury-par-yield-curve-rates.csv')
+  forwardCurves = forwardCurve('../csvs/daily-treasury-par-yield-curve-rates.csv')
   print(forwardCurves)
   graph(forwardCurves)
   pass

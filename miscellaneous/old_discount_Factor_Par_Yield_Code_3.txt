@@ -60,11 +60,7 @@ def calcDisFact(name: str):
   for d, date in enumerate(finalDisFacts.index):
     finalDisFacts.iloc[d, i6m + 1:] = [biannualDisFacts.loc[date, f"{a}y"] for a in annualTimePeriods]
 
-  return finalDisFacts
-
-def calcYields(name: str):
-  finalDisFacts = calcDisFact(name)
-  contCompYields = pd.DataFrame(index = finalDisFacts.index, columns = finalDisFacts.columns, dtype = float)
+  contCompYields = pd.DataFrame(index = df.index, columns = df.columns, dtype = float)
 
   #print(contCompYields)
 
@@ -107,8 +103,8 @@ def graph(pd):
 
   #plt.xlabel('Maturity (Weeks and Years)')
   plt.xlabel('Maturity (Converted to Years for Uniformity)')
-  plt.ylabel('Discount Factor')
-  plt.title('Treasury Par Yield Curve Discount Factors')
+  plt.ylabel('Yield')
+  plt.title('Treasury Continuously Compounded Yield Curve')
   plt.legend()
   plt.grid(True)
   plt.show()

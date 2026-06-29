@@ -31,7 +31,7 @@ def graph(pd):
   plt.show()
 
 def main():
-  periodDF = calcDisFact('daily-treasury-bill-rates.csv')
+  periodDF = calcDisFact('../csvs/daily-treasury-bill-rates.csv')
   print(periodDF)
   graph(periodDF)
 

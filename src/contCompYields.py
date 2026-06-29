@@ -57,7 +57,7 @@ def graph(pd):
   plt.show()
 
 def main():
-  yieldsDF = calcYields('daily-treasury-par-yield-curve-rates.csv')
+  yieldsDF = calcYields('../csvs/daily-treasury-par-yield-curve-rates.csv')
   print(yieldsDF)
   graph(yieldsDF)
 
