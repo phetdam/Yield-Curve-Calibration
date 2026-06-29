@@ -62,30 +62,6 @@ def calcDisFact(name: str):
 
   return finalDisFacts
 
-def calcYields(name: str):
-  finalDisFacts = calcDisFact(name)
-  contCompYields = pd.DataFrame(index = finalDisFacts.index, columns = finalDisFacts.columns, dtype = float)
-
-  #print(contCompYields)
-
-  for d, date in enumerate(contCompYields.index):
-    #print(d, date)
-    for i, col in enumerate(contCompYields.columns):
-      #print(i, col)
-      if "Mo" in col:
-        str = col.split()
-        year = float(str[0]) / 12
-      elif "Yr" in col:
-        str = col.split()
-        year = float(str[0])
-      #print(finalDisFacts.loc[date, col])
-      contCompYields.loc[date, col] = -(1 / year) * math.log(finalDisFacts.loc[date, col])
-
-  #print(contCompYields)
-
-  #return finalDisFacts
-  return contCompYields
-
 def graph(pd):
   weeks = pd.columns
   weeksNumeric = []
