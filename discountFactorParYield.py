@@ -107,8 +107,8 @@ def graph(pd):
 
   #plt.xlabel('Maturity (Weeks and Years)')
   plt.xlabel('Maturity (Converted to Years for Uniformity)')
-  plt.ylabel('Yield')
-  plt.title('Treasury Continuously Compounded Yield Curve')
+  plt.ylabel('Discount Factor')
+  plt.title('Treasury Par Yield Curve Discount Factors')
   plt.legend()
   plt.grid(True)
   plt.show()
@@ -116,11 +116,8 @@ def graph(pd):
 def main():
   #periodDF = calcDisRate('daily-treasury-par-yield-curve-rates.csv')
   periodDF = calcDisFact('daily-treasury-par-yield-curve-rates.csv')
-  yieldsDF = calcYields('daily-treasury-par-yield-curve-rates.csv')
-  #print(periodDF)
-  #graph(periodDF)
-  print(yieldsDF)
-  graph(yieldsDF)
+  print(periodDF)
+  graph(periodDF)
   pass
 
 if __name__ == "__main__":
