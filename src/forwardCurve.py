@@ -109,12 +109,13 @@ def graph_forward_rates(df: pd.DataFrame, n_points: int = 500):
   plt.show()
 
 
-def main():
+def main() -> int:
   dfs = calcDisFact(
     _cur_dir / ".." / "csvs" / "daily-treasury-par-yield-curve-rates.csv"
   )
   graph_forward_rates(dfs)
+  return 0
 
 
 if __name__ == "__main__":
-  main()
+  sys.exit(main())
